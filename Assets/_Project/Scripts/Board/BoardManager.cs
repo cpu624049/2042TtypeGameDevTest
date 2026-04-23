@@ -6,8 +6,10 @@ public class BoardManager : MonoBehaviour
     [Header("Board Settings")]
     [SerializeField] private int width = 4;
     [SerializeField] private int height = 4;
+    [SerializeField] private int startTileCount = 2;
 
     private BoardModel boardModel;
+    private int lastMoveScore = 0;
 
     private void Awake()
     {
@@ -17,19 +19,45 @@ public class BoardManager : MonoBehaviour
     public void InitializeBoard()
     {
         boardModel.Clear();
-
-        // 테스트용 초기 배치
-        SetTestBoard();
+        lastMoveScore = 0;
 
         Debug.Log("BoardManager.InitializeBoard()");
         PrintBoard();
     }
 
-    public void HandleMove(SwipeDirection direction)
+    public void SpawnStartTiles()
+    {
+        for (int i = 0; i < startTileCount; i++)
+        {
+            SpawnRandomTile();
+        }
+    }
+
+    public void SpawnRandomTile()
+    {
+        Vector2Int[] emptyPositions = GetEmptyPositions();
+
+        if (emptyPositions.Length == 0)
+        {
+            Debug.Log("빈 칸 없음: 새 타일 생성 생략");
+            return;
+        }
+
+        Vector2Int spawnPos = emptyPositions[Random.Range(0, emptyPositions.Length)];
+        int spawnValue = Random.value < 0.9f ? 2 : 4;
+
+        boardModel.SetCell(spawnPos.x, spawnPos.y, spawnValue);
+
+        Debug.Log($"새 타일 생성: ({spawnPos.x}, {spawnPos.y}) = {spawnValue}");
+        PrintBoard();
+    }
+
+    public bool HandleMove(SwipeDirection direction)
     {
         Debug.Log($"BoardManager.HandleMove() direction = {direction}");
 
         bool moved = false;
+        lastMoveScore = 0;
 
         switch (direction)
         {
@@ -52,13 +80,44 @@ public class BoardManager : MonoBehaviour
 
         if (moved)
         {
-            Debug.Log("보드 변경 발생");
+            Debug.Log($"보드 변경 발생 / 이번 턴 점수: {lastMoveScore}");
             PrintBoard();
         }
         else
         {
             Debug.Log("보드 변경 없음");
         }
+
+        return moved;
+    }
+
+    public int ConsumeLastMoveScore()
+    {
+        int score = lastMoveScore;
+        lastMoveScore = 0;
+        return score;
+    }
+
+    public bool IsGameOver()
+    {
+        if (GetEmptyPositions().Length > 0)
+            return false;
+
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                int current = boardModel.GetCell(x, y);
+
+                if (x + 1 < width && boardModel.GetCell(x + 1, y) == current)
+                    return false;
+
+                if (y + 1 < height && boardModel.GetCell(x, y + 1) == current)
+                    return false;
+            }
+        }
+
+        return true;
     }
 
     private bool MoveLeft()
@@ -179,7 +238,9 @@ public class BoardManager : MonoBehaviour
         {
             if (i < line.Count - 1 && line[i] == line[i + 1])
             {
-                result.Add(line[i] * 2);
+                int mergedValue = line[i] * 2;
+                result.Add(mergedValue);
+                lastMoveScore += mergedValue;
                 i += 2;
             }
             else
@@ -295,31 +356,22 @@ public class BoardManager : MonoBehaviour
         return true;
     }
 
-    private void SetTestBoard()
+    private Vector2Int[] GetEmptyPositions()
     {
-        // y = 3
-        boardModel.SetCell(0, 3, 2);
-        boardModel.SetCell(1, 3, 0);
-        boardModel.SetCell(2, 3, 2);
-        boardModel.SetCell(3, 3, 4);
+        List<Vector2Int> emptyPositions = new List<Vector2Int>();
 
-        // y = 2
-        boardModel.SetCell(0, 2, 2);
-        boardModel.SetCell(1, 2, 2);
-        boardModel.SetCell(2, 2, 4);
-        boardModel.SetCell(3, 2, 4);
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                if (boardModel.IsEmpty(x, y))
+                {
+                    emptyPositions.Add(new Vector2Int(x, y));
+                }
+            }
+        }
 
-        // y = 1
-        boardModel.SetCell(0, 1, 0);
-        boardModel.SetCell(1, 1, 2);
-        boardModel.SetCell(2, 1, 0);
-        boardModel.SetCell(3, 1, 2);
-
-        // y = 0
-        boardModel.SetCell(0, 0, 2);
-        boardModel.SetCell(1, 0, 2);
-        boardModel.SetCell(2, 0, 2);
-        boardModel.SetCell(3, 0, 0);
+        return emptyPositions.ToArray();
     }
 
     private void PrintBoard()
@@ -337,5 +389,38 @@ public class BoardManager : MonoBehaviour
         }
 
         Debug.Log(log);
+    }
+
+    public bool RemoveLowestTileForContinue()
+    {
+        int lowestValue = int.MaxValue;
+        Vector2Int targetPos = new Vector2Int(-1, -1);
+
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                int value = boardModel.GetCell(x, y);
+
+                if (value <= 0)
+                    continue;
+
+                if (value < lowestValue)
+                {
+                    lowestValue = value;
+                    targetPos = new Vector2Int(x, y);
+                }
+            }
+        }
+
+        if (targetPos.x < 0)
+            return false;
+
+        boardModel.SetCell(targetPos.x, targetPos.y, 0);
+
+        Debug.Log($"이어하기: 가장 낮은 타일 제거 ({targetPos.x}, {targetPos.y}) = {lowestValue}");
+        PrintBoard();
+
+        return true;
     }
 }
