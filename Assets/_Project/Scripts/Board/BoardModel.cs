@@ -37,4 +37,18 @@ public class BoardModel
     {
         return cells[x, y] == 0;
     }
+    public int[,] CopyCells()
+    {
+        int[,] copy = new int[Width, Height];
+
+        for (int x = 0; x < Width; x++)
+        {
+            for (int y = 0; y < Height; y++)
+            {
+                copy[x, y] = cells[x, y];
+            }
+        }
+
+        return copy;
+    }
 }

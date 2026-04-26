@@ -4,6 +4,7 @@ using UnityEngine;
 public class BoardManager : MonoBehaviour
 {
     [Header("Board Settings")]
+    [SerializeField] private BoardView boardView;
     [SerializeField] private int width = 4;
     [SerializeField] private int height = 4;
     [SerializeField] private int startTileCount = 2;
@@ -22,6 +23,7 @@ public class BoardManager : MonoBehaviour
         lastMoveScore = 0;
 
         Debug.Log("BoardManager.InitializeBoard()");
+        RefreshBoardView();
         PrintBoard();
     }
 
@@ -49,6 +51,7 @@ public class BoardManager : MonoBehaviour
         boardModel.SetCell(spawnPos.x, spawnPos.y, spawnValue);
 
         Debug.Log($"새 타일 생성: ({spawnPos.x}, {spawnPos.y}) = {spawnValue}");
+        RefreshBoardView();
         PrintBoard();
     }
 
@@ -81,6 +84,7 @@ public class BoardManager : MonoBehaviour
         if (moved)
         {
             Debug.Log($"보드 변경 발생 / 이번 턴 점수: {lastMoveScore}");
+            RefreshBoardView();
             PrintBoard();
         }
         else
@@ -419,8 +423,17 @@ public class BoardManager : MonoBehaviour
         boardModel.SetCell(targetPos.x, targetPos.y, 0);
 
         Debug.Log($"이어하기: 가장 낮은 타일 제거 ({targetPos.x}, {targetPos.y}) = {lowestValue}");
+        RefreshBoardView();
         PrintBoard();
 
         return true;
+    }
+
+    private void RefreshBoardView()
+    {
+        if (boardView != null)
+        {
+            boardView.Refresh(boardModel.CopyCells());
+        }
     }
 }

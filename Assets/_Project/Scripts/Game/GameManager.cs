@@ -40,7 +40,6 @@ public class GameManager : MonoBehaviour
         }
 
         RefreshScoreUI();
-
         Debug.Log("GameManager.StartGame()");
     }
 
@@ -58,7 +57,13 @@ public class GameManager : MonoBehaviour
 
         if (!moved)
         {
-            Debug.Log("이동 실패: 점수/스폰/게임오버 체크 생략");
+            Debug.Log("이동 실패");
+
+            if (boardManager.IsGameOver())
+            {
+                ShowGameOver();
+            }
+
             return;
         }
 
@@ -69,13 +74,7 @@ public class GameManager : MonoBehaviour
 
         if (boardManager.IsGameOver())
         {
-            currentState = GameState.GameOver;
-            Debug.Log("Game Over");
-            
-            if (gameOverPopup != null)
-            {
-                gameOverPopup.Show(currentScore, !continueUsed);
-            }
+            ShowGameOver();
         }
     }
 
@@ -137,5 +136,16 @@ public class GameManager : MonoBehaviour
         }
 
         Debug.Log("이어하기 성공");
+    }
+
+    private void ShowGameOver()
+    {
+        currentState = GameState.GameOver;
+        Debug.Log("Game Over");
+
+        if (gameOverPopup != null)
+        {
+            gameOverPopup.Show(currentScore, !continueUsed);
+        }
     }
 }
