@@ -20,6 +20,7 @@ public class GameOverPopup : MonoBehaviour
 
     public void Show(int currentScore, bool canContinue)
     {
+        Debug.Log($"GameOverPopup.Show() / score={currentScore} / canContinue={canContinue}");
         gameObject.SetActive(true);
 
         if (scoreText != null)

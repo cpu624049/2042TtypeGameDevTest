@@ -8,6 +8,9 @@ public class BoardManager : MonoBehaviour
     [SerializeField] private int width = 4;
     [SerializeField] private int height = 4;
     [SerializeField] private int startTileCount = 2;
+    // continue/gameover Test
+    [SerializeField] private bool useDebugBoard = false;
+    [SerializeField] private DebugBoardType debugBoardType = DebugBoardType.None;
 
     private BoardModel boardModel;
     private int lastMoveScore = 0;
@@ -22,8 +25,14 @@ public class BoardManager : MonoBehaviour
         boardModel.Clear();
         lastMoveScore = 0;
 
-        Debug.Log("BoardManager.InitializeBoard()");
+        if (useDebugBoard && debugBoardType != DebugBoardType.None)
+        {
+            ApplyDebugBoard(debugBoardType);
+        }
+
         RefreshBoardView();
+
+        Debug.Log("BoardManager.InitializeBoard()");
         PrintBoard();
     }
 
@@ -435,5 +444,80 @@ public class BoardManager : MonoBehaviour
         {
             boardView.Refresh(boardModel.CopyCells());
         }
+    }
+
+    private void ApplyDebugBoard(DebugBoardType boardType)
+    {
+        boardModel.Clear();
+
+        switch (boardType)
+        {
+            case DebugBoardType.GameOver:
+                SetDebugGameOverBoard();
+                break;
+
+            case DebugBoardType.ContinueTest:
+                SetDebugContinueTestBoard();
+                break;
+        }
+    }
+
+    private void SetDebugGameOverBoard()
+    {
+        // y = 3
+        boardModel.SetCell(0, 3, 2);
+        boardModel.SetCell(1, 3, 4);
+        boardModel.SetCell(2, 3, 2);
+        boardModel.SetCell(3, 3, 4);
+
+        // y = 2
+        boardModel.SetCell(0, 2, 4);
+        boardModel.SetCell(1, 2, 2);
+        boardModel.SetCell(2, 2, 4);
+        boardModel.SetCell(3, 2, 2);
+
+        // y = 1
+        boardModel.SetCell(0, 1, 2);
+        boardModel.SetCell(1, 1, 4);
+        boardModel.SetCell(2, 1, 2);
+        boardModel.SetCell(3, 1, 4);
+
+        // y = 0
+        boardModel.SetCell(0, 0, 4);
+        boardModel.SetCell(1, 0, 2);
+        boardModel.SetCell(2, 0, 4);
+        boardModel.SetCell(3, 0, 2);
+    }
+
+    private void SetDebugContinueTestBoard()
+    {
+        // y = 3
+        boardModel.SetCell(0, 3, 2);
+        boardModel.SetCell(1, 3, 4);
+        boardModel.SetCell(2, 3, 2);
+        boardModel.SetCell(3, 3, 4);
+
+        // y = 2
+        boardModel.SetCell(0, 2, 4);
+        boardModel.SetCell(1, 2, 8);
+        boardModel.SetCell(2, 2, 4);
+        boardModel.SetCell(3, 2, 8);
+
+        // y = 1
+        boardModel.SetCell(0, 1, 2);
+        boardModel.SetCell(1, 1, 16);
+        boardModel.SetCell(2, 1, 2);
+        boardModel.SetCell(3, 1, 16);
+
+        // y = 0
+        boardModel.SetCell(0, 0, 4);
+        boardModel.SetCell(1, 0, 32);
+        boardModel.SetCell(2, 0, 64);
+        boardModel.SetCell(3, 0, 128);
+    }
+
+    public bool IsUsingDebugBoard()
+    {
+        return useDebugBoard && debugBoardType != DebugBoardType.None;
     }
 }

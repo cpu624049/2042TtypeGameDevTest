@@ -32,7 +32,11 @@ public class GameManager : MonoBehaviour
         }
 
         boardManager.InitializeBoard();
-        boardManager.SpawnStartTiles();
+
+        if (!boardManager.IsUsingDebugBoard())
+        {
+            boardManager.SpawnStartTiles();
+        }
 
         if (gameOverPopup != null)
         {
@@ -136,6 +140,11 @@ public class GameManager : MonoBehaviour
         }
 
         Debug.Log("이어하기 성공");
+        
+        if (boardManager.IsGameOver())
+        {
+            ShowGameOver();
+        }
     }
 
     private void ShowGameOver()

@@ -13,3 +13,10 @@ public enum SwipeDirection
     Left,
     Right
 }
+
+public enum DebugBoardType
+{
+    None,
+    GameOver,
+    ContinueTest
+}
