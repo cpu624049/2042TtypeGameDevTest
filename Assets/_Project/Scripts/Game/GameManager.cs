@@ -5,6 +5,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private BoardManager boardManager;
     [SerializeField] private HUDController hudController;
     [SerializeField] private GameOverPopup gameOverPopup;
+    [SerializeField] private TutorialOverlayController tutorialOverlayController;
+    [SerializeField] private AudioManager audioManager;
 
     private GameState currentState = GameState.Ready;
     private int currentScore = 0;
@@ -43,6 +45,11 @@ public class GameManager : MonoBehaviour
             gameOverPopup.Hide();
         }
 
+        if (tutorialOverlayController != null)
+        {
+            tutorialOverlayController.TryShowFirstTime();
+        }
+
         RefreshScoreUI();
         Debug.Log("GameManager.StartGame()");
     }
@@ -71,7 +78,18 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        if (audioManager != null)
+        {
+            audioManager.PlayMove();
+        }
+
         int gainedScore = boardManager.ConsumeLastMoveScore();
+
+        if (gainedScore > 0 && audioManager != null)
+        {
+            audioManager.PlayMerge();
+        }
+
         AddScore(gainedScore);
 
         boardManager.SpawnRandomTile();

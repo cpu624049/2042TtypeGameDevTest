@@ -8,6 +8,7 @@ public class GameOverPopup : MonoBehaviour
     [SerializeField] private Button continueButton;
     [SerializeField] private Button restartButton;
     [SerializeField] private GameManager gameManager;
+    [SerializeField] private AudioManager audioManager;
 
     private void Start()
     {
@@ -21,6 +22,7 @@ public class GameOverPopup : MonoBehaviour
     public void Show(int currentScore, bool canContinue)
     {
         Debug.Log($"GameOverPopup.Show() / score={currentScore} / canContinue={canContinue}");
+
         gameObject.SetActive(true);
 
         if (scoreText != null)
@@ -41,6 +43,11 @@ public class GameOverPopup : MonoBehaviour
 
     private void OnClickContinue()
     {
+        if (audioManager != null)
+        {
+            audioManager.PlayClick();
+        }
+
         if (gameManager != null)
         {
             gameManager.TryContinue();
@@ -49,6 +56,11 @@ public class GameOverPopup : MonoBehaviour
 
     private void OnClickRestart()
     {
+        if (audioManager != null)
+        {
+            audioManager.PlayClick();
+        }
+
         if (gameManager != null)
         {
             gameManager.StartGame();
